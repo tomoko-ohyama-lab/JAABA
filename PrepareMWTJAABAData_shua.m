@@ -61,5 +61,6 @@ for i=1:length(timestamps)
         'arenaheight',123);
     fprintf('trx.mat successfully created: %s\n',timestamps{i})
 end
+disp('All trx.mat successfully created!')
 cd(perframe)
 end
