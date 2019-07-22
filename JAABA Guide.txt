@@ -1,0 +1,3 @@
+*FINAL VERSIONS POSTED ON GITHUB*
+-----------------NOTE---------------------------------
+1. any function with _CC is meant for cluster computer
