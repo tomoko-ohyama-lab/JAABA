@@ -139,7 +139,7 @@ end
 % create text files (animal_stats_rolls)
 switch version
     case 1 %(time1,time2,tsize)
-        CreateBinStatFile(allScores,crabspeed,genoInfo,aninum,timebins)
+        CreateBinStatFile_modifiableBin1(allScores,crabspeed,genoInfo,aninum,timebins)
     case 2 %(start,end,rdur)
         CreateIndStatFile(allScores,crabspeed,genoInfo,aninum)
 end

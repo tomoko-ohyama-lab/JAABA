@@ -1,0 +1,105 @@
+function FeatureExtraction_JAABA(genotype)
+%% SET MANAULLY
+genotype='attp2@UAS_Chrimson@t93@r_LED30_30s2x15s30s#n#n#n@100';
+feature='roll_beg_short';
+bins = [15,30,45,60,75,90,105,120];
+pool={}; % pool=raw pool stat data
+%%
+[driver,effector,tracker,protocol,times]=read_name(genotype);
+addpath('C:\Users\Ohyama_Dell\Documents\JAABA\JAABA-master\JAABA-master\FE')
+%% count how many timestamps
+expdir=strcat('C:\Users\Ohyama_Dell\Documents\JAABA_processed\',tracker,'\',strcat(driver,'@',effector),'\',strcat(protocol,'@100'));
+FE=cd(expdir);
+temp=dir(pwd);
+timestamps=cell(1,length(temp)-2);
+for i=3:length(temp) 
+    timestamps(i-2)=cellstr(temp(i).name);
+end
+clear temp
+%% Make directories needed to save files
+dir_FEstructureJAABA(driver,effector,tracker,protocol,timestamps)
+FEname=strcat(driver,'@',effector,'@',tracker,'@',protocol,'@100.crabspeed_area-animal_stats_rolls_JAABA.txt');
+%% Loop goes over every timestamp in one genotype
+for i=1:length(timestamps)
+    output=[]; % output=raw FE data
+    timestamp=timestamps{i};
+    cd(timestamp)
+    allScores=load(strcat('scores_',feature,'_updated.mat'));
+    aninum=length(allScores.allScores.allScores.tStart);
+    crabspeed=allScores.allScores.allScores.crabspeed;
+    frames=[];
+    ind=[];
+    %% loop goes over every animal in one timestamp
+    for j=1:aninum
+        track_start=allScores.allScores.allScores.tStartSeconds(j);%double
+        track_stop=allScores.allScores.allScores.tEndSeconds(j);%double
+        beh_start=allScores.allScores.allScores.t0sSeconds(j);%1x1cell
+        beh_stop=allScores.allScores.allScores.t1sSeconds(j);%1x1cell
+        [frames,overlap]=getFrames(bins,track_start,track_stop,beh_start,beh_stop);
+        if all(frames(:) == 0)
+            % do nothing
+        else
+            % select crabspeed
+            temp=(crabspeed(:,2)==j);
+            %if all(temp==0)
+                
+            %else
+                index=find(temp);
+                selectedCrabspeed=crabspeed(min(index):max(index),3:4);
+                clear temp
+                clear index
+                % fill in
+                row=size(frames);
+                frames(1:row(1),2:3)=frames(1:row(1),1:2); %column2,3=time1,time2
+                frames(1:row(1),1)=j; %column1=animal
+                clear row
+                frames=fillFrames_test(frames,overlap,selectedCrabspeed,track_start,track_stop,beh_start,beh_stop,bins);
+                output=vertcat(output,frames);
+            %end
+        end
+    end
+    %% Convert each row to string
+    strarray=[];
+    for j=1:length(output)
+        strarray{j}=sprintf('\t%5.0i\t%3.2f\t%3.2f\t%2.3f\t%2.3f\t%3.3f\t%3.3f\t%2.3f',output(j,1:end));
+        strarray{j}=strcat(timestamp,strarray{j});
+    end
+    %% Save the stat.txt
+    filename=strcat('C:\Users\Ohyama_Dell\Documents\feature_extraction\',tracker,'\',driver,'@',effector,'\',protocol,'@100\',timestamp,'\',FEname);
+    fileID=fopen(filename,'w');
+    fprintf(fileID,'%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\r\n','time_stamp','animal','time1','time2','rampl','rdur','rpos','rbeg','tsize');
+    for j=1:length(strarray)
+        fprintf(fileID,'%s\r\n',strarray{j});
+    end
+    fclose(fileID);
+    clear temp
+    %% make pool file
+    temp={};
+    row=size(output);
+    temp(1:row(1),1)={timestamps{i}};
+    temp(:,2:9)=num2cell(output(:,1:8));
+    pool=vertcat(pool,temp);
+    clear temp
+    %%
+    fprintf('FE_JAABA Successfully Produced: %s\n',timestamps{i});
+    cd(expdir);
+end
+%% POOL: Convert each row to string
+strarray=[];
+for j=1:length(pool)
+    timestamp=pool{j,1};
+    strarray{j}=sprintf('\t%5.0i\t%3.2f\t%3.2f\t%2.3f\t%2.3f\t%3.3f\t%3.3f\t%2.3f',pool{j,2:end});
+    strarray{j}=strcat(timestamp,strarray{j});
+end
+%% Save pool file
+filename=strcat('C:\Users\Ohyama_Dell\Documents\feature_extraction\',tracker,'\',driver,'@',effector,'\',protocol,'@100\',FEname);
+fileID=fopen(filename,'w');
+fprintf(fileID,'%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\r\n','time_stamp','animal','time1','time2','rampl','rdur','rpos','rbeg','tsize');
+for j=1:length(pool)
+    fprintf(fileID,'%s\r\n',strarray{j});
+end
+fclose(fileID);
+%%
+disp('All FE_JAABA Successfully Produced!')
+cd(FE)
+end

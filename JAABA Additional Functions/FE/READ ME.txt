@@ -1,0 +1,9 @@
+***************************************************
+Main function (can modify bin):
+
+FeatureExtraction_JAABA.m (complete)
+OR
+FeatureExtraction_JAABA_CC.m (not complete)
+***************************************************
+
+Other functions are non-modifiable.

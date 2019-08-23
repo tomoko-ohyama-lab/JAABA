@@ -1,0 +1,34 @@
+Please paste these two folders under ...\JAABA\JAABA-master to use additional functions at your desktop or elsewhere.
+
+Info
+-------------------------------------------------------------------
+*FE
+includes functions used to create 
+'(genotype).crabspeed_area-animal_stats_rolls_JAABA.txt'
+using JAABA detection of behavior
+
+Main function is 'FeatureExtraction_JAABA'
+
+Modifiable factors: only inputs (genotype,timebins,classifier name)
+
+Must use Matlab 2017a or higher
+-------------------------------------------------------------------
+*Perframe
+Major functions:
+
+<Process Data, is a complete process>
+ProcessMWTJAABAData_shua('genotype','classifier name')
+
+<Making trx.mat seperately>
+run PrepareJAABAData: GUI 
+PrepareTrx('genotype'): Non-GUI, takes shorter time
+
+<PostProcessing JAABA data seperately>
+PostProcessJAABA_shua(...)
+
+<Train JAABA>
+run StartJAABA
+
+Must use Matlab 2014a
+-------------------------------------------------------------------
+
